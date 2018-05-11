@@ -74,7 +74,7 @@
 				margin-bottom: 30px;
 				/*color: inherit;*/
 				color: white;
-				background: url("http://www.wallpapersxl.com/wallpapers/1920x1080/mapamundi/246464/mapamundi-grande-mapa-mundi-vector-digital-246464.jpg") no-repeat center center fixed;
+				background: url("http://www.glucosehealthinc.com/sites/default/files/blog/biosolutions.jpg") no-repeat center center fixed;
 				-webkit-background-size: cover;
 				-moz-background-size: cover;
 				-o-background-size: cover;
@@ -94,7 +94,7 @@
                 <h1 class="text-center">Sign up in CGMAPP</h1>
 			</div>
 			<div class="page-header">
-                <h2 class="text-center">Monitore your glucose for free!</h2>
+                <h2 class="text-center">Monitor your glucose for free!</h2>
             </div>
 			<form class="form-horizontal text-center" role="form" method="post" action=".">
 				{% csrf_token  %}

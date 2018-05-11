@@ -8,7 +8,13 @@ from django.contrib.auth import login as auth_login
 
 def index(request):
 	if not request.user.is_authenticated():
-		return HttpResponse("SI")
+		return HttpResponse("Hello World\n")
+
+def config(request):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect('cgmapp/login')
+	context = {'min':70, 'max':110}
+	return render(request, 'cgmapp/config.html', context)
 
 def login(request):
 	if request.user.is_authenticated():
