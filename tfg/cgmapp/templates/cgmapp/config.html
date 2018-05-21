@@ -38,7 +38,7 @@
 	  box-shadow: none;
 	}
 	.lg{
-	  width: 400px;
+	  width: 80px;
 	  margin-bottom: 20px;
 	  margin-left:auto;
 	  margin-right:auto;
@@ -98,22 +98,52 @@
 				<label>{{request.user.username}} [</label>
 				<a style="color:red" href="{% url 'logout' %}?next=/cgmapp/login">Log out </a><label> ]</label>
 			</div>
+			<h2>Choose your glucose interval</h2>
+			<BR>
 			<form class="form-horizontal text-center" role="form" method="post" action=".">
 				{% csrf_token  %}
-				<div class="col-lg-10 col-lg-offset-1">
-					<div class="input-group lg">
-						<span class="input-group-addon"><i class="fa fa-user"></i></span>
-				        <input type="text" class="form-control" id="id_username" maxlength="30" name="username" placeholder="User Name(Max 30 characters)">
-		        	</div>                
-                </div>
-
-				<div class="col-lg-10 col-lg-offset-1">
-		          	<div class="input-group lg">
-				        <span class="input-group-addon"><i class="fa fa-lock" ></i></span>
-				        <input type="password" class="form-control" id="id_password1" name="password1" placeholder="Password">
-		        	</div>
+				<div class = "col-lg-5 col-lg-offset-4">
+					<div class="row">
+						<div class = "col-lg-3">
+							<label>Min glucose: </label>
+						</div>
+						<div class = "col-lg-2">
+							<input type="textfield" name="mingluc" class="form-control" maxlength="3" required/>
+						</div>
+					</div>
 				</div>
-
+				<BR>
+				<BR>
+				<div class = "col-lg-5 col-lg-offset-4">
+					<div class="row">
+						<div class = "col-lg-3">
+							<label>Max glucose: </label>
+						</div>
+						<div class = "col-lg-2">
+							<input type="textfield" name="maxgluc" class="form-control" maxlength="3" required/>
+						</div>
+					</div>
+				</div>
+				<BR>
+				<BR>
+				<BR>
+				<h2 class="text-left">How do you want to receive the alerts?</h2>
+				<input type="checkbox" name="smscb" value="SMS"> SMS<BR>
+				<input type="checkbox" name="telegramcb" value="Telegram"> Telegram<BR>
+				<BR>
+				<div class = "col-lg-7 col-lg-offset-3">
+					<div class="row">
+						<div class = "col-lg-3">
+							<label>Phone number: </label>
+						</div>
+						<div class = "col-lg-3">
+							<input type="textfield" name="phonenumber" class="form-control" maxlength="9" />
+						</div>
+					</div>
+				</div>
+				<BR>
+				<BR>
+				<BR>
 				<div class="text-center">
 					{% if form.errors %}
 						<label><font color="red"><p> User name already exists or passwords don't match. Please Try again.</font></p></label>
@@ -121,7 +151,7 @@
 	            </div>
 				
 				<div class="form-group in">
-		          <input type="submit" class="btn btn-primary btn-lg" style='width:300px;height:50px;margin-bottom:10px' value="Sign up">
+		          <input type="submit" class="btn btn-primary btn-lg" style='width:300px;height:50px;margin-bottom:10px' value="Confirm">
 		        </div>
 
 				<div class="form-group">
