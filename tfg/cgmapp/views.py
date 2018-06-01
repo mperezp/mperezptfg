@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from cgmapp.models import Reading
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 
@@ -9,7 +10,17 @@ from django.contrib.auth import login as auth_login
 def index(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('cgmapp/login')
-	context = {'user':request.user}
+	try:
+		readings_list = Reading.objects.get(username=request.user).history_set.all()
+	except:
+		readings_list = ''
+	if request.POST.has_key('delete'):
+		for r in readings_list:
+			r.delete()
+		readings_list = Reading.objects.get(username=request.user).history_set.all()
+		context = {'readings_list':readings_list}
+		return render(request, 'cgmapp/index.html', context)
+	context = {'user':request.user,'readings_list':readings_list}
 	return render(request, 'cgmapp/index.html', context)
 
 def config(request):
