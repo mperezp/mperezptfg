@@ -105,37 +105,12 @@
 						<a style="color:black" href="{% url 'config' %}">Config</a>
 					</div>
 				</div>
-				<form action="{% url 'index' %}" method="post">
-					{% csrf_token %}
-					<button type="submit" class="btn btn-primary" name="read" style='width:150px;height:40px;margin-left:10px'>Monitorizar</button>
-				</form>
-				<h2 class="text-left">Histórico</h2>
-				<div class="dropdown">
-					<label>Mostrar únicamente</label>
-					<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><span class="caret"></span></button>
-					<ul class="dropdown-menu">
-						<li>12 horas</li>
-						<li>1 día</li>
-						<li>3 días</li>
-						<li>1 semana</li>
-					</ul>
-				</div>
-				{% if readings_list %}
-					<ul class="list-group">
-						{% for reading in readings_list %}
-							<li class="list-group-item">
-							<a>{{ reading.date }}</a>
-							<a href="{% url 'show' id %}">{{ reading.valor }}</a>
-						{% endfor %}
-					</ul>
-				{% else %}
-					<p>Sin lecturas recientes</p>
-				{% endif %}
-				<form action="{% url 'index' %}" method="post">
-					{% csrf_token %}
-					<button type="submit" class="btn btn-primary" name="delete" style='width:150px;height:40px;margin-left:10px'>Limpiar lista</button>
-				</form>
 				<BR>
+				<div class="form-group">
+					<div class="text-center">
+						<a style="color:black" href="{% url 'index' %}">Back to main</a>
+					</div>
+				</div>
 			</div>
 		</div>
 	</body>

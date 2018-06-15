@@ -9,12 +9,14 @@ from django.contrib.auth import login as auth_login
 
 def index(request):
 	if not request.user.is_authenticated():
-		return HttpResponseRedirect('cgmapp/login')
+		return HttpResponseRedirect('/cgmapp/login')
 	try:
 		readings_list = Reading.objects.get(username=request.user).history_set.all()
 	except:
 		readings_list = ''
-	if request.POST.has_key('delete'):
+	if request.POST.has_key('read'):
+		pass
+	elif request.POST.has_key('delete'):
 		for r in readings_list:
 			r.delete()
 		readings_list = Reading.objects.get(username=request.user).history_set.all()
@@ -23,11 +25,26 @@ def index(request):
 	context = {'user':request.user,'readings_list':readings_list}
 	return render(request, 'cgmapp/index.html', context)
 
+
 def config(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('cgmapp/login')
-	context = {'min':70, 'max':110}
+	ming = request.POST.get('mingluc',70)
+	maxg = request.POST.get('maxgluc',110)
+	context = {'mingluc':ming, 'maxgluc':maxg}
 	return render(request, 'cgmapp/config.html', context)
+
+
+def show(request, read_id):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect('cgmapp/login')
+	try:
+		read = Reading.objects.get(id=read_id)
+	except:
+		pass
+	context = {'user':request.user, 'read': read}
+	return render(request, 'cgmapp/show.html', context)
+
 
 def login(request):
 	if request.user.is_authenticated():
