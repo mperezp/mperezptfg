@@ -1,0 +1,15 @@
+from django import forms
+from django.core.exceptions import ValidationError
+
+class IntervalForm(forms.Form):
+	mingluc = forms.IntegerField()
+	maxgluc = forms.IntegerField()
+
+	def clean_interval(self):
+		mingluc = self.cleaned_data['mingluc']
+		maxgluc = self.cleaned_data['maxgluc']	
+
+		if mingluc > maxgluc:
+			raise ValidationError('Error: Max must be greater than min')
+
+		return ming, maxg

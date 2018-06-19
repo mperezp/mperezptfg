@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from cgmapp.models import Reading
+from cgmapp.forms import IntervalForm
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 
@@ -22,17 +23,46 @@ def index(request):
 		readings_list = Reading.objects.get(username=request.user).history_set.all()
 		context = {'readings_list':readings_list}
 		return render(request, 'cgmapp/index.html', context)
+	elif request.POST.has_key('config'):
+		errors=[]
+		ming = request.POST['mingluc']
+		maxg = request.POST['maxgluc']
+		try:
+			ming = int(ming)
+			maxg = int(maxg)
+			if(ming>maxg):
+				errors.append('Max must be greater than min')
+			else:
+				context={'mingluc':ming, 'maxgluc':maxg}
+				return render(request, 'cgmapp/index.html', context)
+		except:
+			errors.append('Inputs must be integers')
+		if errors != []:
+			ming=70
+			maxg=110
+		return render(request, 'cgmapp/index.html', {'errors':errors,'mingluc':ming,'maxgluc':maxg})
 	context = {'user':request.user,'readings_list':readings_list}
 	return render(request, 'cgmapp/index.html', context)
 
 
 def config(request):
+	errors=[]
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('cgmapp/login')
-	ming = request.POST.get('mingluc',70)
-	maxg = request.POST.get('maxgluc',110)
-	context = {'mingluc':ming, 'maxgluc':maxg}
-	return render(request, 'cgmapp/config.html', context)
+	if request.method=='POST':	
+		ming = request.POST['mingluc']
+		maxg = request.POST['maxgluc']
+		try:
+			ming = int(ming)
+			maxg = int(maxg)
+			if(ming > maxg):
+				errors.append('Max must be greater than min.')
+			else:
+				context={'mingluc':ming, 'maxgluc':maxg}
+				return render(request, 'cgmapp/config.html', context)
+		except:
+			errors.append('Inputs must be integers.')			
+	return render(request, 'cgmapp/config.html', {'errors':errors})
 
 
 def show(request, read_id):
