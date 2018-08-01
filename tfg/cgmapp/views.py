@@ -1,14 +1,44 @@
+# coding=utf-8
 from django.shortcuts import render
 from cgmapp.models import Reading
-from cgmapp.forms import IntervalForm
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
+from django.conf import settings
+from datetime import timedelta
+from twilio.rest import TwilioRestClient
+import time
+import telegram
+import nightscout
 
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm #Para crear formularios (para login)
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 
+def alert_sms(username, date, valor, mingluc, maxgluc):
+	message = "ALERTA DE GLUCOSA.\n" + "Usuario: " + str(username) +"\n" + "Fecha: " + str(date) + "\n" + "Valor: " + str(valor)
+	client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+	if (valor < mingluc):
+		message += " inferior al mínimo[" + mingluc + "]"
+	elif (valor > maxgluc):
+		message += " superior al maximo[" + maxgluc + "]"
+	client.messages.create(body=message, to="+34637298394", from_="")
+
+
+def alert_telegram(username, date, valor, mingluc, maxgluc):
+	message = "ALERTA DE GLUCOSA.\n" + "Usuario: " + str(username) +"\n" + "Fecha: " + str(date) + "\n" + "Valor: " + str(valor)
+	if (valor < mingluc):
+		message += " inferior al mínimo[" + mingluc + "]"
+	elif (valor > maxgluc):
+		message += " superior al maximo[" + maxgluc + "]"
+	bot = telegram.Bot(token='567375109:AAFQTI8N7kiLAFSQm5KEzmM0uWR4Xq8XW3o')
+	bot.sendMessage(chat_id='-1001348736833', text=message)
+
+
 def index(request):
+	ming=70
+	maxg=110
+	#twilio_account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+	#twilio_auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('/cgmapp/login')
 	try:
@@ -16,7 +46,45 @@ def index(request):
 	except:
 		readings_list = ''
 	if request.POST.has_key('read'):
+		'''
+		llamar api heroku
+		timenow = datetime.now()
+		time.sleep(10)	#10 segundos de margen para realizar la lectura
+		heroku = herokuapi.HerokuAPI(api_key, api_secret, format)
+		readget = heroku.get	
+		valorhk = readget.
+
+		guardar valor
+		read = Reading(username=request.user, date=timenow, valor=valorhk)
+		read.save()  		
+
+		smscb = request.GET['smscb']
+		telegramcb = request.GET['telegramcb']
+		if smscb:
+			alert_sms(username, date, valor, mingluc, maxgluc)
+		if telegramcb:
+			alert_telegram(username, date, valor, mingluc, maxgluc)
+		'''
 		pass
+	elif request.POST.has_key('filter'):
+		'''
+		opt = request.GET.get('dropdown','alld')
+		if opt == "alld":
+			readings_list = Reading.objects.get(username=request.user).history_set.all()
+			context = {'readings_list':readings_list}
+			return render(request, 'cgmapp/index.html', context)
+		if opt == "1d":
+			td=1
+		elif opt == "3d":
+			td=3
+		elif opt == "1w":
+			td=7
+		d=date.today()-timedelta(days=td)
+		readings_list= Reading.objects.get(username=request.user).filter(date__gte=d)
+		context = {'readings_list':readings_list}
+		return render(request, 'cgmapp/index.html', context)
+		'''
+		pass	
 	elif request.POST.has_key('delete'):
 		for r in readings_list:
 			r.delete()
@@ -41,7 +109,7 @@ def index(request):
 			ming=70
 			maxg=110
 		return render(request, 'cgmapp/index.html', {'errors':errors,'mingluc':ming,'maxgluc':maxg})
-	context = {'user':request.user,'readings_list':readings_list}
+	context = {'user':request.user,'readings_list':readings_list,'mingluc':ming,'maxgluc':maxg}
 	return render(request, 'cgmapp/index.html', context)
 
 
@@ -49,6 +117,9 @@ def config(request):
 	errors=[]
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('cgmapp/login')
+	answer=request.POST.get('test',10)
+	if answer=="ab":
+		return HttpResponseRedirect('/cgmapp')
 	if request.method=='POST':	
 		ming = request.POST['mingluc']
 		maxg = request.POST['maxgluc']

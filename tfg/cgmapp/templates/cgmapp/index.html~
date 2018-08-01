@@ -61,23 +61,6 @@
 			margin-left:auto;
 			margin-right:auto;
 		}
-		.btn-info{
-			background-color: #12A0E4;
-			color: #000000;
-			height: 50px;
-			line-height: 50px;
-			min-width: 200px;
-			padding: 20px;
-			vertical-align: top;
-			font-family: "Proxima Nova","helvetica neue",helvetica,arial,sans-serif;
-			font-weight: 600;
-			font-size: 16px;
-			text-align: center;
-			transition: all 90ms;
-			border-radius: 30px;
-			style='width:70px;
-			height:25px;
-		}
 
 		.jumbotron {
 					padding-top: 30px;
@@ -123,16 +106,17 @@
 					<button type="submit" class="btn btn-primary" name="read" style='width:150px;height:40px;margin-left:10px'>Monitorizar</button>
 				</form>
 				<h2 class="text-left">Histórico</h2>
-				<div class="dropdown">
-					<label>Mostrar únicamente</label>
-					<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><span class="caret"></span></button>
-					<ul class="dropdown-menu">
-						<li>12 horas</li>
-						<li>1 día</li>
-						<li>3 días</li>
-						<li>1 semana</li>
-					</ul>
-				</div>
+				<label>Mostrar </label>
+				<select name="dropdown">
+					<option value="1d">Último día</option>
+					<option value="3d">Últimos 3 días</option>
+					<option value="1s">Última semana</option>
+					<option value="alld" selected>Todo</option>
+				</select>
+				<form action="{% url 'index' %}" method="post">
+					{% csrf_token %}
+					<button type="submit" class="btn btn-primary" name="filter">Filtrar</button>
+				</form>
 				{% if readings_list %}
 					<ul class="list-group">
 						{% for reading in readings_list %}
@@ -196,7 +180,9 @@
 					</div>
 					<BR>
 					<BR>
-					{{mingluc}},{{maxgluc}}
+					<label>Intervalo actual: [</label>{{mingluc}},{{maxgluc}}<label>]</label>
+					<BR>
+					<BR>
 					<div class="text-center">
 						{% if errors %}
 							{% for error in errors %}

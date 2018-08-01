@@ -37,6 +37,9 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_twilio',
+    'telegrambot',
+    'rest_framework',
     'cgmapp',
 )
 
@@ -101,3 +104,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+TWILIO_ACCOUNT_SID='AC634873e41f65a490e887040a5aaffbb2'
+TWILIO_AUTH_TOKEN='b1bb6f097b00c472b93a7f4699133a58'
