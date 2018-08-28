@@ -100,7 +100,14 @@
 			</div>
 			<h2>Selecciona tu intervalo de glucosa</h2>
 			<BR>
-			<form class="form-horizontal text-center" role="form" method="post" action="{% url 'config' %}">
+			<h2 class="text-left">Configuración</h2>
+			<h3 class="text-left">¿Cómo quieres recibir las alertas?</h3>
+			<input type="checkbox" id="cbs" name="smscb" value="SMS"> SMS<BR>
+			<p id="text" style="display:none"> SMS is checked </p>
+			<input type="checkbox" name="telegramcb" value="Telegram"> Telegram<BR>
+			<hr>
+			<h3>Selecciona tu intervalo de glucosa</h3>
+			<form action="{% url 'index' %}" method="post">
 				{% csrf_token  %}
 				<div class = "col-lg-5 col-lg-offset-4">
 					<div class="row">
@@ -126,54 +133,28 @@
 				</div>
 				<BR>
 				<BR>
-				{% if errors %}
-					<ul>
-						{% for error in errors %}
-						<li>{{ error }}</li>
-						{% endfor %}
-					</ul>
-				{% endif %}
-				<BR>
-				<h2 class="text-left">¿Cómo quieres recibir las alertas?</h2>
-				<input type="checkbox" name="smscb" value="SMS"> SMS<BR>
-				<input type="checkbox" name="telegramcb" value="Telegram"> Telegram<BR>
-				<!--
-				<BR>
-				<div class = "col-lg-7 col-lg-offset-3">
-					<div class="row">
-						<div class = "col-lg-3">
-							<label>Número de teléfono: </label>
-						</div>
-						<div class = "col-lg-3">
-							<input type="textfield" name="phonenumber" class="form-control" maxlength="9" />
-						</div>
-					</div>
+				<div class="text-center">
+					<label>Intervalo actual: [</label>{{mingluc}},{{maxgluc}}<label>]</label>
 				</div>
-				-->
-				<BR>
-				<select name="test">
-					<option value="ab">10</option>
-					<option value="20">20</option>
-				</select>
 				<BR>
 				<BR>
 				<div class="text-center">
-					{% if form.errors %}
-						<label><font color="red"><p> User name already exists or passwords don't match. Please Try again.</font></p></label>
+					{% if errors %}
+						{% for error in errors %}
+						<label><font color="red"><p> {{ error }}</font></p></label>
+						{% endfor %}
 					{% endif %}
 				</div>
-				
-				<div class="form-group in">
-					<input type="submit" class="btn btn-primary btn-lg" name="config" style='width:300px;height:50px;margin-bottom:10px' value="Confirm">
+				<BR>
+				<div class="form-group in text-center">
+					<input type="submit" class="btn btn-primary btn-lg" name="config" style='width:150px;height:50px;margin-bottom:10px' value="Confirm">
 				</div>
-
-				<div class="form-group">
-					<div class="text-center">
-						<a style="color:black" href="{% url 'index' %}">Back to main</a>
-					</div>
-				</div>
-
 			</form>
+			<div class="form-group">
+				<div class="text-center">
+					<a style="color:black" href="{% url 'index' %}">Volver</a>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>

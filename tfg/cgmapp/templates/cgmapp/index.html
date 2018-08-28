@@ -8,17 +8,6 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-		<script>
-			function myFunction(){
-				var checkbox = document.getElementById("cbs");
-				var text = document.getElementById("text");
-				if (checkbox.checked == true){
-					text.style.display = "block";
-				} else{
-					text.style.display = "none";
-				}
-			}
-		</script>
 		<style>
 		body,
 		html{
@@ -93,18 +82,21 @@
 					<a style="color:red" href="{% url 'logout' %}?next={{request.path}}">Log out </a><label> ]</label>
 				</div>
 				<BR>
+				<a href="{% url 'config' %}">Config</a>
 				<form action="{% url 'index' %}" method="post">
 					{% csrf_token %}
-					<button title="hola" type="submit" class="btn btn-primary" name="read" style='width:150px;height:40px;margin-left:10px;'>Monitorizar</button>
+					<button type="submit" class="btn btn-primary" name="read" style='width:150px;height:40px;margin-left:10px;'>Monitorizar</button>
 				</form>
 				<BR>
-				<BR>
 				{% if read_error %}
-					<div class="alert">
-						Error de lectura
-					</div>
+					<p style="color:#ff0000"><font size="6">Error de lectura</font></p>
 				{% endif %}
-				<label>Tu tasa de glucosa actual es:</label>
+				<p><font size="5">Tu tasa de glucosa actual es:</font></p>
+				<div style="font-size:72">
+					{% if last_read %}
+						{{last_read.valor}}
+					{% endif %}
+				</div>
 				{% if tend == 'desc' %}
 					<i class="fa fa-level-down" style="font-size:48px; color:#0000ff"></i>
 				{% elif tend == 'asc' %}

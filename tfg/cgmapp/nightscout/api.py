@@ -1,5 +1,6 @@
 import requests
-import hashlib
+import dateutil.parser
+from datetime import timedelta
 from models import SGV
 
 class Api(object):
@@ -12,5 +13,8 @@ class Api(object):
 		temp = r.json()
 		valor = temp[0]['sgv']
 		date = temp[0]['dateString']
-		sgv = SGV(sgv=valor, dateString=date)
+		parsed_date = dateutil.parser.parse(date)
+		parsed_date = parsed_date + timedelta(hours=2)
+		d = parsed_date.strftime("%d-%m-%Y %H:%M")
+		sgv = SGV(sgv=valor, dateString=d)
 		return sgv

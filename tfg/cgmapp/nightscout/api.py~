@@ -1,5 +1,5 @@
 import requests
-import hashlib
+import dateutil.parser
 from models import SGV
 
 class Api(object):
@@ -9,5 +9,10 @@ class Api(object):
 
 	def getCurrentSgv(self):
 		r = requests.get(self.site_url + '/api/v1/entries/current.json')
-		SGV = r.json()
-		return SGV
+		temp = r.json()
+		valor = temp[0]['sgv']
+		date = temp[0]['dateString']
+		parsed_date = dateutil.parser.parse(date)
+		d = date.strftime("%d-%m-%Y %H:%M:%S")
+		sgv = SGV(sgv=valor, dateString=d)
+		return sgv
