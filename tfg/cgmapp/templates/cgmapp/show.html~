@@ -105,6 +105,16 @@
 						<a style="color:black" href="{% url 'config' %}">Config</a>
 					</div>
 				</div>
+				{% if read %}
+					<div class="row col-sm-12">
+						<div class="text-center" style="font-size: medium; padding: 10px 0 10px 0">
+							<label>Tu tasa de glucosa actual es: </label> <BR>
+							<label style="font-size: x-large;">{{ read.valor }}</label>
+						</div>
+					</div>
+				{% else %}
+					<p> ERROR: Invalid read </p>
+				{% endif %}
 				<BR>
 				<div class="form-group">
 					<div class="text-center">

@@ -27,7 +27,7 @@ class SGV(BaseModel):
 	def __init__(self, **kwargs):
 		self.param_defaults = {
 			'sgv': None,
-			'date' : None,
+			'dateString' : None,
 		}
 
 		for (param, default) in self.param_defaults.items():

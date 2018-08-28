@@ -93,18 +93,26 @@
 					<a style="color:red" href="{% url 'logout' %}?next={{request.path}}">Log out </a><label> ]</label>
 				</div>
 				<BR>
-				<!--
-				<div class="form-group">
-					<div class="text-right">
-						<span class="input-grout-addon"><i class="fa fa-cog"" ></i></span>
-						<a style="color:black" href="{% url 'config' %}">Config</a>
-					</div>
-				</div>
-				-->
 				<form action="{% url 'index' %}" method="post">
 					{% csrf_token %}
-					<button type="submit" class="btn btn-primary" name="read" style='width:150px;height:40px;margin-left:10px'>Monitorizar</button>
+					<button title="hola" type="submit" class="btn btn-primary" name="read" style='width:150px;height:40px;margin-left:10px;'>Monitorizar</button>
 				</form>
+				<BR>
+				<BR>
+				{% if read_error %}
+					<div class="alert">
+						Error de lectura
+					</div>
+				{% endif %}
+				<label></label>
+				{% if tend == 'desc' %}
+					<i class="fa fa-level-down" style="font-size:48px; color:#0000ff"></i>
+				{% elif tend == 'asc' %}
+					<i class="fa fa-level-up" style="font-size:48px; color:#ff0000"></i>
+				{% elif tend == 'norm' %}
+					<i class="fa fa-long-arrow-right" style="font-size:48px; color:#00ff00"></i>
+				{% endif %}
+				<BR>
 				<h2 class="text-left">Histórico</h2>
 				<label>Mostrar </label>
 				<select name="dropdown">
@@ -122,7 +130,7 @@
 						{% for reading in readings_list %}
 							<li class="list-group-item">
 							<a>{{ reading.date }}</a>
-							<a href="{% url 'show' id %}">{{ reading.valor }}</a>
+							<a>{{ reading.valor }}</a>
 						{% endfor %}
 					</ul>
 				{% else %}
@@ -139,19 +147,6 @@
 				<input type="checkbox" id="cbs" name="smscb" value="SMS"> SMS<BR>
 				<p id="text" style="display:none"> SMS is checked </p>
 				<input type="checkbox" name="telegramcb" value="Telegram"> Telegram<BR>
-				<!--
-				<BR>
-				<div class = "col-lg-7 col-lg-offset-3">
-					<div class="row">
-						<div class = "col-lg-3">
-							<label>Número de teléfono: </label>
-						</div>
-						<div class = "col-lg-3">
-							<input type="textfield" name="phonenumber" class="form-control" maxlength="9" />
-						</div>
-					</div>
-				</div>
-				-->
 				<hr>
 				<h3>Selecciona tu intervalo de glucosa</h3>
 				<form action="{% url 'index' %}" method="post">
@@ -180,7 +175,9 @@
 					</div>
 					<BR>
 					<BR>
-					<label>Intervalo actual: [</label>{{mingluc}},{{maxgluc}}<label>]</label>
+					<div class="text-center">
+						<label>Intervalo actual: [</label>{{mingluc}},{{maxgluc}}<label>]</label>
+					</div>
 					<BR>
 					<BR>
 					<div class="text-center">

@@ -1,7 +1,7 @@
 import dateutil.parser
 from datetime import datetime
 
-class BaseModel(Object):
+class BaseModel(object):
 	def __init__(self, **kwargs):
 		self.param_defaults = {}
 

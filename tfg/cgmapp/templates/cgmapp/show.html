@@ -99,13 +99,7 @@
 					<a style="color:red" href="{% url 'logout' %}?next={{request.path}}">Log out </a><label> ]</label>
 				</div>
 				<BR>
-				<div class="form-group">
-					<div class="text-right">
-						<span class="input-grout-addon"><i class="fa fa-cog"" ></i></span>
-						<a style="color:black" href="{% url 'config' %}">Config</a>
-					</div>
-				</div>
-				{% if read %}
+				{% if readings_list %}
 					<div class="row col-sm-12">
 						<div class="text-center" style="font-size: medium; padding: 10px 0 10px 0">
 							<label>Tu tasa de glucosa actual es: </label> <BR>
@@ -113,7 +107,7 @@
 						</div>
 					</div>
 				{% else %}
-					<p> ERROR: Invalid read </p>
+					<p> Sin lecturas recientes </p>
 				{% endif %}
 				<BR>
 				<div class="form-group">
