@@ -8,6 +8,12 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<script>
+			function saveData(){
+				sessionStorage.ming = mingluc
+				sessionStorage.maxg = maxgluc
+			}
+		</script>
 		<style>
 		body,
 		html{
@@ -82,7 +88,6 @@
 					<a style="color:red" href="{% url 'logout' %}?next={{request.path}}">Log out </a><label> ]</label>
 				</div>
 				<BR>
-				<a href="{% url 'config' %}">Config</a>
 				<form action="{% url 'index' %}" method="post">
 					{% csrf_token %}
 					<button type="submit" class="btn btn-primary" name="read" style='width:150px;height:40px;margin-left:10px;'>Monitorizar</button>
@@ -91,32 +96,48 @@
 				{% if read_error %}
 					<p style="color:#ff0000"><font size="6">Error de lectura</font></p>
 				{% endif %}
-				<p><font size="5">Tu tasa de glucosa actual es:</font></p>
-				<div style="font-size:72">
-					{% if last_read %}
-						{{last_read.valor}}
-					{% endif %}
-				</div>
-				{% if tend == 'desc' %}
-					<i class="fa fa-level-down" style="font-size:48px; color:#0000ff"></i>
-				{% elif tend == 'asc' %}
-					<i class="fa fa-level-up" style="font-size:48px; color:#ff0000"></i>
-				{% elif tend == 'norm' %}
-					<i class="fa fa-long-arrow-right" style="font-size:48px; color:#00ff00"></i>
+				{% if read %}
+					<p><font size="5">Tu tasa de glucosa actual en la fecha {{read.date}} es:</font></p>
+					<div class="col-lg-4">
+						<div class="row">
+							<div class="col-lg-3">
+								<p><font size="10">{{read.valor}}</font></p>
+							</div>
+							<div class="col-lg-1">
+								{% if tend == 'desc' %}
+								<i class="fa fa-level-down" style="font-size:48px; color:#0000ff"></i>
+								{% elif tend == 'asc' %}
+								<i class="fa fa-level-up" style="font-size:48px; color:#ff0000"></i>
+								{% elif tend == 'norm' %}
+								<i class="fa fa-long-arrow-right" style="font-size:48px; color:#00ff00"></i>
+								{% endif %}
+							</div>
+							<BR>
+						</div>
+						<BR>
+					</div>
+					<BR>
 				{% endif %}
+				<BR>
+				<BR>
+				<BR>
 				<BR>
 				<h2 class="text-left">Histórico</h2>
 				<label>Mostrar </label>
+				<input type="date" name="datefilt" min="2018-08-01">
+				<!--
 				<select name="dropdown">
 					<option value="1d">Último día</option>
 					<option value="3d">Últimos 3 días</option>
 					<option value="1s">Última semana</option>
 					<option value="alld" selected>Todo</option>
 				</select>
+				-->
 				<form action="{% url 'index' %}" method="post">
 					{% csrf_token %}
 					<button type="submit" class="btn btn-primary" name="filter">Filtrar</button>
 				</form>
+				<BR>
 				{% if readings_list %}
 					<ul class="list-group">
 						{% for reading in readings_list %}
@@ -181,7 +202,7 @@
 					</div>
 					<BR>
 					<div class="form-group in text-center">
-						<input type="submit" class="btn btn-primary btn-lg" name="config" style='width:150px;height:50px;margin-bottom:10px' value="Confirm">
+						<input type="submit" onclick="saveData()" class="btn btn-primary btn-lg" name="config" style='width:150px;height:50px;margin-bottom:10px' value="Confirm">
 					</div>
 				</form>
 			</div>

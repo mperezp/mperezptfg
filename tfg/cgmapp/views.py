@@ -42,14 +42,11 @@ def index(request):
 	maxg=110	#máximo estándar en ayunas
 	tend=None	#tendencia de los niveles de glucosa (comparacion actual con previa)
 	last_read=None	#valor de la última lectura registrada en el sistema
+	read=None
 	api = nightscout.Api('https://mperezpcgm.herokuapp.com')	#nuestra api de nightscout
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('/cgmapp/login')	#si no esta logeado, tiene que hacerlo
 	readings_list = User.objects.get(username=request.user).reading_set.all()	#obtenemos el histórico del usuario
-	try:
-		last_read = readings_list.last()
-	except:
-		pass
 	if request.POST.has_key('read'):	#si queremos realizar una lectura
 		currentsgv = api.getCurrentSgv()		#obtenemos el SGV (Sensor Glucose Value) actual
 		valorc = int(currentsgv.sgv)			#tomamos el campo valor del SGV
@@ -57,8 +54,12 @@ def index(request):
 		if readings_list:	#si hay lecturas en la lista
 			for r in readings_list:		#recorremos la lista de lecturas del usuario
 				if r.date == datec:		#si la fecha de la lectura ya está en la lista, la lectura falló
-					context = {'readings_list': readings_list, 'read_error':'yes'}	#mostramos un mensaje de error al usuario
+					context = {'readings_list': readings_list, 'mingluc':ming, 'maxgluc':maxg, 'read_error':'yes'}	#mostramos un mensaje de error al usuario
 					return render(request, 'cgmapp/index.html', context)
+		try:
+			last_read = readings_list.last()
+		except:
+			pass
 		read = Reading(username=request.user, date=datec, valor=valorc)	#creamos una nueva entrada en el historial del usuario
 		read.save()  	#guardamos los cambios
 		try:	#comprobamos si ya hay algún valor almacenado para comprobar la tendencia
@@ -72,30 +73,34 @@ def index(request):
 			pass
 		if (read.valor < ming or read.valor > maxg):	#si se detecta que la lectura es anormal, se llama a los servicios externos
 			smscb = request.GET.get('smscb',False)	#estado de la opción de SMS
-			telegramcb = request.GET.get('telegramcb',False)	#estado de la opción de Telegram
+			telegramcb = request.GET.get('telegramcb', False)	#estado de la opción de Telegram
 			'''
 			if smscb:
 				alert_sms(request.user, read.date, read.valor, ming, maxg)	#si está marcada la opción de alerta por sms, invocamos al servicio
 			'''
 			if telegramcb:
 				alert_telegram(request.user, read.date, read.valor, ming, maxg)	#si está marcada la opción de telegram, invocamos al servicio
-		context= {'readings_list':readings_list, 'last_read':read, 'tend':tend, 'mingluc':ming,'maxgluc':maxg}
-		return render(request, 'cgmapp/index.html', context)
 	elif request.POST.has_key('filter'):
-		opt = request.GET.get('dropdown','alld')
-		if opt == "alld":
-			readings_list = User.objects.get(username=request.user).reading_set.all()
-			context = {'readings_list':readings_list}
-			return render(request, 'cgmapp/index.html', context)
+		day = request.session['datefilt']
+		print day
+		print "aaaa"
+		'''
 		if opt == "1d":
+			print "abab"
 			td=1
 		elif opt == "3d":
 			td=3
 		elif opt == "1s":
 			td=7
-		d=datetime.today()-timedelta(days=td)
+		elif opt == "alld":
+			readings_list = User.objects.get(username=request.user).reading_set.all()
+			print "bbbb"
+			context = {'readings_list':readings_list}
+			return render(request, 'cgmapp/index.html', context)
+		d=datetime.today()-timedelta(hours=td)
 		d=d.strftime("%d-%m-%Y %H:%M")
-		readings_list= User.objects.get(username=request.user).reading_set.filter(date__gte=d)
+		'''
+		readings_list= User.objects.get(username=request.user).reading_set.filter(date__gte=day)
 		context = {'readings_list':readings_list,'mingluc':ming, 'maxgluc':maxg}
 		return render(request, 'cgmapp/index.html', context)	
 	elif request.POST.has_key('delete'):
@@ -122,7 +127,7 @@ def index(request):
 			ming=70
 			maxg=110
 		return render(request, 'cgmapp/index.html', {'readings_list':readings_list,'errors':errors,'mingluc':ming,'maxgluc':maxg})
-	context = {'user':request.user,'readings_list':readings_list,'mingluc':ming,'maxgluc':maxg, 'tend':tend, 'last_read':last_read}
+	context = {'user':request.user,'readings_list':readings_list,'mingluc':ming,'maxgluc':maxg, 'tend':tend, 'read':read}
 	return render(request, 'cgmapp/index.html', context)
 
 
