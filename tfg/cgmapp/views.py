@@ -81,26 +81,10 @@ def index(request):
 			if telegramcb:
 				alert_telegram(request.user, read.date, read.valor, ming, maxg)	#si está marcada la opción de telegram, invocamos al servicio
 	elif request.POST.has_key('filter'):
-		day = request.session['datefilt']
-		print day
-		print "aaaa"
-		'''
-		if opt == "1d":
-			print "abab"
-			td=1
-		elif opt == "3d":
-			td=3
-		elif opt == "1s":
-			td=7
-		elif opt == "alld":
-			readings_list = User.objects.get(username=request.user).reading_set.all()
-			print "bbbb"
-			context = {'readings_list':readings_list}
-			return render(request, 'cgmapp/index.html', context)
-		d=datetime.today()-timedelta(hours=td)
-		d=d.strftime("%d-%m-%Y %H:%M")
-		'''
-		readings_list= User.objects.get(username=request.user).reading_set.filter(date__gte=day)
+		day = request.POST['datefilt']
+		y,m,d = day.split("-")
+		filt = d + "-" + m + "-" + y
+		readings_list= User.objects.get(username=request.user).reading_set.filter(date__gte=filt)
 		context = {'readings_list':readings_list,'mingluc':ming, 'maxgluc':maxg}
 		return render(request, 'cgmapp/index.html', context)	
 	elif request.POST.has_key('delete'):

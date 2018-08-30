@@ -123,17 +123,9 @@
 				<BR>
 				<BR>
 				<h2 class="text-left">Histórico</h2>
-				<label>Mostrar </label>
-				<input type="date" name="datefilt" min="2018-08-01">
-				<!--
-				<select name="dropdown">
-					<option value="1d">Último día</option>
-					<option value="3d">Últimos 3 días</option>
-					<option value="1s">Última semana</option>
-					<option value="alld" selected>Todo</option>
-				</select>
-				-->
+				<label>Mostrar lecturas desde: </label>
 				<form action="{% url 'index' %}" method="post">
+					<input type="date" name="datefilt" min="2018-08-01">
 					{% csrf_token %}
 					<button type="submit" class="btn btn-primary" name="filter">Filtrar</button>
 				</form>
