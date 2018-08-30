@@ -8,3 +8,14 @@ class Reading (models.Model):
 
 	def __unicode__(self):
 		return self.date
+
+class Conf (models.Model):
+	username = models.ForeignKey(django_user)
+	ming = models.IntegerField()
+	maxg = models.IntegerField()
+	smscheck = models.BooleanField(default=False)
+	tgcheck = models.BooleanField(default=False)
+	date = models.DateField()
+	
+	def __unicode__(self):
+		return self.date
