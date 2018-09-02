@@ -94,62 +94,107 @@
                 <h1 class="text-center">Configura tus parámetros</h1>
 			</div>
 			<div class = "text-right">
-				<label>Welcome </label>
+				<label>Bienvenido </label>
 				<label>{{request.user.username}} [</label>
-				<a style="color:red" href="{% url 'logout' %}?next=/cgmapp/login">Log out </a><label> ]</label>
+				<a style="color:red" href="{% url 'logout' %}?next=/cgmapp/login">Salir </a><label> ]</label>
 			</div>
-			<h2>Selecciona tu intervalo de glucosa</h2>
 			<BR>
 			<h2 class="text-left">Configuración</h2>
 			<h3 class="text-left">¿Cómo quieres recibir las alertas?</h3>
-			<input type="checkbox" id="cbs" name="smscb" value="SMS"> SMS<BR>
-			<p id="text" style="display:none"> SMS is checked </p>
-			<input type="checkbox" name="telegramcb" value="Telegram"> Telegram<BR>
-			<hr>
-			<h3>Selecciona tu intervalo de glucosa</h3>
-			<form action="{% url 'index' %}" method="post">
-				{% csrf_token  %}
-				<div class = "col-lg-5 col-lg-offset-4">
-					<div class="row">
-						<div class = "col-lg-3">
-							<label>Mínimo: </label>
-						</div>
-						<div class = "col-lg-2">
-							<input type="text" name="mingluc" class="form-control" maxlength="3" required/>
+			<form action="{% url 'config' %}" method="post">
+				<input type="checkbox" class="save-cb-state" name="smscb" value="SMS"> SMS<BR>
+				<input type="checkbox" class="save-cb-state" name="telegramcb" value="Telegram"> Telegram<BR>
+				<script src="http://code.jquery.com/jquery.js"></script>
+				<!-- This JavaScript file is required to load the XpressDox interview as well as the code required to run it -->
+				 
+				<script>
+				// Avoid scoping issues by encapsulating code inside anonymous function
+				(function() {
+				  // variable to store our current state
+				  var cbstate;
+				  
+				  // bind to the onload event
+				  window.addEventListener('load', function() {
+					// Get the current state from localstorage
+					// State is stored as a JSON string
+					cbstate = JSON.parse(localStorage['CBState'] || '{}');
+				  
+					// Loop through state array and restore checked 
+					// state for matching elements
+					for(var i in cbstate) {
+					  var el = document.querySelector('input[name="' + i + '"]');
+					  if (el) el.checked = true;
+					}
+				  
+					// Get all checkboxes that you want to monitor state for
+					var cb = document.getElementsByClassName('save-cb-state');
+				  
+					// Loop through results and ...
+					for(var i = 0; i < cb.length; i++) {
+				  
+					  //bind click event handler
+					  cb[i].addEventListener('click', function(evt) {
+						// If checkboxe is checked then save to state
+						if (this.checked) {
+						  cbstate[this.name] = true;
+						}
+					
+					// Else remove from state
+						else if (cbstate[this.name]) {
+						  delete cbstate[this.name];
+						}
+					
+					// Persist state
+						localStorage.CBState = JSON.stringify(cbstate);
+					  });
+					}
+				  });
+				})();
+				</script>
+				<hr>
+				<h3>Selecciona tu intervalo de glucosa</h3>
+					{% csrf_token  %}
+					<div class = "col-lg-5 col-lg-offset-4">
+						<div class="row">
+							<div class = "col-lg-3">
+								<label>Mínimo: </label>
+							</div>
+							<div class = "col-lg-2">
+								<input type="text" name="mingluc" class="form-control" maxlength="3" required/>
+							</div>
 						</div>
 					</div>
-				</div>
-				<BR>
-				<BR>
-				<div class = "col-lg-5 col-lg-offset-4">
-					<div class="row">
-						<div class = "col-lg-3">
-							<label>Máximo: </label>
-						</div>
-						<div class = "col-lg-2">
-							<input type="textfield" name="maxgluc" class="form-control" maxlength="3" required/>
+					<BR>
+					<BR>
+					<div class = "col-lg-5 col-lg-offset-4">
+						<div class="row">
+							<div class = "col-lg-3">
+								<label>Máximo: </label>
+							</div>
+							<div class = "col-lg-2">
+								<input type="textfield" name="maxgluc" class="form-control" maxlength="3" required/>
+							</div>
 						</div>
 					</div>
-				</div>
-				<BR>
-				<BR>
-				<div class="text-center">
-					<label>Intervalo actual: [</label>{{mingluc}},{{maxgluc}}<label>]</label>
-				</div>
-				<BR>
-				<BR>
-				<div class="text-center">
-					{% if errors %}
-						{% for error in errors %}
-						<label><font color="red"><p> {{ error }}</font></p></label>
-						{% endfor %}
-					{% endif %}
-				</div>
-				<BR>
-				<div class="form-group in text-center">
-					<input type="submit" class="btn btn-primary btn-lg" name="config" style='width:150px;height:50px;margin-bottom:10px' value="Confirm">
-				</div>
-			</form>
+					<BR>
+					<BR>
+					<div class="text-center">
+						<label>Intervalo actual: [</label>{{mingluc}},{{maxgluc}}<label>]</label>
+					</div>
+					<BR>
+					<BR>
+					<div class="text-center">
+						{% if errors %}
+							{% for error in errors %}
+							<label><font color="red"><p> {{ error }}</font></p></label>
+							{% endfor %}
+						{% endif %}
+					</div>
+					<BR>
+					<div class="form-group in text-center">
+						<input type="submit" class="btn btn-primary btn-lg" name="config" style='width:150px;height:50px;margin-bottom:10px' value="Confirm">
+					</div>
+				</form>
 			<div class="form-group">
 				<div class="text-center">
 					<a style="color:black" href="{% url 'index' %}">Volver</a>

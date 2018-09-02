@@ -91,46 +91,46 @@
 	<div class="container-fluid">
 		<div class="jumbotron col-sm-20 col-sm-offset-0">
 			<div class="page-header">
-                <h1 class="text-center">Sign up in CGMAPP</h1>
+                <h1 class="text-center">Regístrate en CGMAPP</h1>
 			</div>
 			<div class="page-header">
-                <h2 class="text-center">Monitor your glucose for free!</h2>
+                <h2 class="text-center">¡Monitoriza tu glucosa gratis!</h2>
             </div>
 			<form class="form-horizontal text-center" role="form" method="post" action=".">
 				{% csrf_token  %}
 				<div class="col-lg-10 col-lg-offset-1">
 					<div class="input-group lg">
 						<span class="input-group-addon"><i class="fa fa-user"></i></span>
-				        <input type="text" class="form-control" id="id_username" maxlength="30" name="username" placeholder="User Name(Max 30 characters)">
+				        <input type="text" class="form-control" id="id_username" maxlength="30" name="username" placeholder="Usuario (Máximo 30 caracteres)">
 		        	</div>                
                 </div>
 
 				<div class="col-lg-10 col-lg-offset-1">
 		          	<div class="input-group lg">
 				        <span class="input-group-addon"><i class="fa fa-lock" ></i></span>
-				        <input type="password" class="form-control" id="id_password1" name="password1" placeholder="Password">
+				        <input type="password" class="form-control" id="id_password1" name="password1" placeholder="Contraseña">
 		        	</div>
 				</div>
 
 				<div class="col-lg-10 col-lg-offset-1">
 		          	<div class="input-group lg">
 				        <span class="input-group-addon"><i class="fa fa-lock" ></i></span>
-				        <input type="password" class="form-control" id="id_password2" name="password2" placeholder="Please retype password">
+				        <input type="password" class="form-control" id="id_password2" name="password2" placeholder="Repita contraseña">
 		        	</div>
 				</div>
 				<div class="text-center">
 					{% if form.errors %}
-						<label><font color="red"><p> User name already exists or passwords don't match. Please Try again.</font></p></label>
+						<label><font color="red"><p> Usuario ya existente o las contrasñas no coinciden. Inténtelo de nuevo.</font></p></label>
 	            	{% endif %}
 	            </div>
 				
 				<div class="form-group in">
-		          <input type="submit" class="btn btn-primary btn-lg" style='width:300px;height:50px;margin-bottom:10px' value="Sign up">
+		          <input type="submit" class="btn btn-primary btn-lg" style='width:300px;height:50px;margin-bottom:10px' value="Registrarse">
 		        </div>
 
 				<div class="form-group">
                     <div class="text-center">
-                        <a style="color:black" href="{% url 'login' %}">Go back</a>
+                        <a style="color:black" href="{% url 'login' %}">Volver</a>
                     </div>
                 </div>
 

@@ -38,8 +38,6 @@ def alert_telegram(username, date, valor, mingluc, maxgluc):
 
 
 def index(request):
-	ming=None	#mínimo estándar en ayunas
-	maxg=None	#máximo estándar en ayunas
 	tend=None	#tendencia de los niveles de glucosa (comparacion actual con previa)
 	last_read=None	#valor de la última lectura registrada en el sistema
 	read=None
@@ -49,7 +47,7 @@ def index(request):
 	readings_list = User.objects.get(username=request.user).reading_set.all()	#obtenemos el histórico del usuario
 	try:
 		conf = User.objects.get(username=request.user).conf_set.last()
-		conf.save()
+		#conf.save()
 	except:
 		conf = Conf(username=request.user, ming=70, maxg=110, smscheck=False, tgcheck=False, date=datetime.now())
 		conf.save()
@@ -60,7 +58,7 @@ def index(request):
 		if readings_list:	#si hay lecturas en la lista
 			for r in readings_list:		#recorremos la lista de lecturas del usuario
 				if r.date == datec:		#si la fecha de la lectura ya está en la lista, la lectura falló
-					context = {'readings_list': readings_list, 'mingluc':ming, 'maxgluc':maxg, 'read_error':'yes'}	#mostramos un mensaje de error al usuario
+					context = {'readings_list': readings_list, 'read_error':'yes'}	#mostramos un mensaje de error al usuario
 					return render(request, 'cgmapp/index.html', context)
 		try:
 			last_read = readings_list.last()
@@ -77,7 +75,7 @@ def index(request):
 				tend = 'norm'
 		except:
 			pass
-		if (read.valor < ming or read.valor > maxg):	#si se detecta que la lectura es anormal, se llama a los servicios externos
+		if (read.valor < conf.ming or read.valor > conf.maxg):	#si se detecta que la lectura es anormal, se llama a los servicios externos
 			smscb = conf.smscheck	#estado de la opción de SMS
 			telegramcb = conf.tgcheck
 			if smscb:
@@ -90,14 +88,15 @@ def index(request):
 		y,m,d = day.split("-")
 		filt = d + "-" + m + "-" + y
 		readings_list= User.objects.get(username=request.user).reading_set.filter(date__gte=filt)
-		context = {'readings_list':readings_list,'mingluc':conf.ming, 'maxgluc':conf.maxg}
+		context = {'readings_list':readings_list}
 		return render(request, 'cgmapp/index.html', context)	
 	elif request.POST.has_key('delete'):
 		for r in readings_list:		#para cada lectura almacenada del usuario
 			r.delete()		#la borramos
 		readings_list = User.objects.get(username=request.user).reading_set.all()	#y obtenemos una nueva lista vacía
-		context = {'readings_list':readings_list,'mingluc':conf.ming, 'maxgluc':conf.maxg}
+		context = {'readings_list':readings_list}
 		return render(request, 'cgmapp/index.html', context)
+	'''
 	elif request.POST.has_key('config'):
 		errors=[]
 		mingl = request.POST['mingluc']
@@ -123,14 +122,46 @@ def index(request):
 		if errors != []:		#si hay algún error, obtenemos la última configuración válida
 			conf = User.objects.get(username=request.user).conf_set.last()
 		return render(request, 'cgmapp/index.html', {'readings_list':readings_list,'errors':errors,'mingluc':conf.ming,'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck})
-	context = {'user':request.user,'readings_list':readings_list,'mingluc':conf.ming,'maxgluc':conf.maxg, 'tend':tend, 'read':read, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
+	'''
+	context = {'user':request.user,'readings_list':readings_list, 'tend':tend, 'read':read}
 	return render(request, 'cgmapp/index.html', context)
 
 
 def config(request):
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('cgmapp/login')
-	context={}
+	try:
+		conf = User.objects.get(username=request.user).conf_set.last()
+		conf.save()
+	except:
+		conf = Conf(username=request.user, ming=70, maxg=110, smscheck=False, tgcheck=False, date=datetime.now())
+		conf.save()
+	if request.POST.has_key('config'):
+		errors=[]
+		mingl = request.POST['mingluc']
+		maxgl = request.POST['maxgluc']
+		sms = request.POST.get('smscb', False)
+		telegram = request.POST.get('telegramcb', False) 
+		try:
+			mingl = int(mingl)								#miramos si los parámetros son enteros
+			maxgl = int(maxgl)
+			if(mingl>maxgl):									#y si el mínimo es superior al máximo
+				errors.append('El máximo debe ser superior al mínimo')
+			else:											#si entramos aquí, los datos introducidos son correctos
+				if sms=="on":
+					sms=True
+				if telegram=="on":
+					telegram=True
+				conf = Conf(username=request.user, ming=mingl, maxg=maxgl, smscheck=sms, tgcheck=telegram, date=datetime.now())
+				conf.save()
+				context={'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
+				return render(request, 'cgmapp/config.html', context)
+		except:
+			errors.append('Los valores deben ser enteros')
+		if errors != []:		#si hay algún error, obtenemos la última configuración válida
+			conf = User.objects.get(username=request.user).conf_set.last()
+		return render(request, 'cgmapp/config.html', {'errors':errors,'mingluc':conf.ming,'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck})
+	context={'user':request.user,'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
 	return render(request, 'cgmapp/config.html', context)
 
 

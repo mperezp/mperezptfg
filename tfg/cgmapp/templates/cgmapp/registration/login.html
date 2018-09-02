@@ -98,25 +98,25 @@
 				<div class="col-lg-10 col-lg-offset-1">
 					<div class="input-group lg">
 				        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-				        <input type="text" class="form-control" maxlength="30" id="id_username" name="username" placeholder="User Name">
+				        <input type="text" class="form-control" maxlength="30" id="id_username" name="username" placeholder="Usuario">
 		        	</div>
 				</div>
 				<div class="col-lg-10 col-lg-offset-1">
 		          	<div class="input-group lg">
 				        <span class="input-group-addon"><i class="fa fa-lock" ></i></span>
-				        <input type="password" class="form-control" id="id_password" name="password" placeholder="Password">
+				        <input type="password" class="form-control" id="id_password" name="password" placeholder="Contraseña">
 		        	</div>
 				</div>
 				{% if form.errors %}
-		        	<label><font color="red"><p>Incorrect user name or password. Please Try again.</font></p></label>
+		        	<label><font color="red"><p>Nombre de usuario o contraseña incorrectos. Inténtelo de nuevo</font></p></label>
 		        {% endif %}
             	<div class="form-group in">
 		          <input type="submit" class="btn btn-primary btn-lg" style='width:300px;height:50px;margin-bottom:10px' value="Log in">
 		        </div>
                 <div class="form-group">
                     <div class="text-center">
-                        <label>You do not have an account? </label>
-                        <a style="color:black" href="{% url 'register' %}">Sign up free here!</a>
+                        <label>¿No tienes una cuenta?</label>
+                        <a style="color:black" href="{% url 'register' %}">¡Regístrate gratis aquí!</a>
                     </div>
                 </div>
             </form>
