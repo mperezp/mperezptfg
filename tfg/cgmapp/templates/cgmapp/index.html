@@ -114,12 +114,19 @@
 				{% endif %}
 				{% if read %}
 					<p><font size="5">Tu tasa de glucosa actual en la fecha {{read.date}} es:</font></p>
-					<div class="col-lg-4">
+					<div class="col-lg-5">
 						<div class="row">
+							<div class="col-lg-1">
+								{% if read.is_alert %}
+								<BR>
+								<i class="fa fa-warning" style="font-size:30px;color:red"></i>
+								{% endif %}
+							</div>
 							<div class="col-lg-3">
 								<p><font size="10">{{read.valor}}</font></p>
 							</div>
 							<div class="col-lg-1">
+								<BR>
 								{% if tend == 'desc' %}
 								<i class="fa fa-level-down" style="font-size:48px; color:#0000ff"></i>
 								{% elif tend == 'asc' %}

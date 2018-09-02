@@ -40,15 +40,14 @@ def alert_telegram(username, date, valor, mingluc, maxgluc):
 def index(request):
 	tend=None	#tendencia de los niveles de glucosa (comparacion actual con previa)
 	last_read=None	#valor de la última lectura registrada en el sistema
-	read=None
+	read=None	#lectura actual
 	api = nightscout.Api('https://mperezpcgm.herokuapp.com')	#nuestra api de nightscout
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('/cgmapp/login')	#si no esta logeado, tiene que hacerlo
 	readings_list = User.objects.get(username=request.user).reading_set.all()	#obtenemos el histórico del usuario
-	try:
+	try:		#obtenemos la última configuración válida, si existe
 		conf = User.objects.get(username=request.user).conf_set.last()
-		#conf.save()
-	except:
+	except:		#si no existe, creamos la configuración por defecto
 		conf = Conf(username=request.user, ming=70, maxg=110, smscheck=False, tgcheck=False, date=datetime.now())
 		conf.save()
 	if request.POST.has_key('read'):	#si queremos realizar una lectura
@@ -60,11 +59,13 @@ def index(request):
 				if r.date == datec:		#si la fecha de la lectura ya está en la lista, la lectura falló
 					context = {'readings_list': readings_list, 'read_error':'yes'}	#mostramos un mensaje de error al usuario
 					return render(request, 'cgmapp/index.html', context)
-		try:
+		try:	#obtenemos la última lectura registrada en el sistema, si existe
 			last_read = readings_list.last()
 		except:
 			pass
-		read = Reading(username=request.user, date=datec, valor=valorc)	#creamos una nueva entrada en el historial del usuario
+		if (valorc < conf.ming or valorc > conf.maxg):
+			alert = True
+		read = Reading(username=request.user, date=datec, valor=valorc, is_alert=alert)	#creamos una nueva entrada en el historial del usuario
 		read.save()  	#guardamos los cambios
 		try:	#comprobamos si ya hay algún valor almacenado para comprobar la tendencia
 			if read.valor < last_read.valor:
@@ -76,19 +77,23 @@ def index(request):
 		except:
 			pass
 		if (read.valor < conf.ming or read.valor > conf.maxg):	#si se detecta que la lectura es anormal, se llama a los servicios externos
-			smscb = conf.smscheck	#estado de la opción de SMS
-			telegramcb = conf.tgcheck
+			smscb = conf.smscheck			#estado de la opción de SMS
+			telegramcb = conf.tgcheck		#estado de la opción de telegram
 			if smscb:
 				alert_sms(request.user, read.date, read.valor, conf.ming, conf.maxg)	#si está marcada la opción de alerta por sms, invocamos al servicio
-
 			if telegramcb:
 				alert_telegram(request.user, read.date, read.valor, conf.ming, conf.maxg)	#si está marcada la opción de telegram, invocamos al servicio
 	elif request.POST.has_key('filter'):
-		day = request.POST['datefilt']
-		y,m,d = day.split("-")
-		filt = d + "-" + m + "-" + y
-		readings_list= User.objects.get(username=request.user).reading_set.filter(date__gte=filt)
-		context = {'readings_list':readings_list}
+		day = request.POST['datefilt']	#obtenemos la fecha de filtrado introducida
+		filt_list = []	#lista final filtrada
+		readings_list = User.objects.get(username=request.user).reading_set.all()	#obtenemos la lista de lecturas de usuario
+		for r in readings_list:				#para cada lectura, tendremos que cambiar su formato para comparar con el input
+			f,h = r.date.split(" ")			#dividimos por fecha y hora
+			d,m,y = f.split("-")			#y la fecha por partes
+			filt = y + "-" + m + "-" + d	#obtenemos el formato para comparar con el input
+			if (day <= filt):				#solo añadimos si el input es anterior o igual a la lectura
+				filt_list.append(r)			#nueva entrada en la lista filtrada
+		context = {'readings_list':filt_list}
 		return render(request, 'cgmapp/index.html', context)	
 	elif request.POST.has_key('delete'):
 		for r in readings_list:		#para cada lectura almacenada del usuario
@@ -148,10 +153,11 @@ def config(request):
 			if(mingl>maxgl):									#y si el mínimo es superior al máximo
 				errors.append('El máximo debe ser superior al mínimo')
 			else:											#si entramos aquí, los datos introducidos son correctos
-				if sms=="on":
+				if sms=="on":		#comprobamos el estado del checkbox de sms
 					sms=True
-				if telegram=="on":
+				if telegram=="on":	#y del de Telegram
 					telegram=True
+				#creamos una nueva configuración con los valores actuales
 				conf = Conf(username=request.user, ming=mingl, maxg=maxgl, smscheck=sms, tgcheck=telegram, date=datetime.now())
 				conf.save()
 				context={'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
