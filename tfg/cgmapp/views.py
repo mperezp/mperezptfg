@@ -41,6 +41,7 @@ def index(request):
 	tend=None	#tendencia de los niveles de glucosa (comparacion actual con previa)
 	last_read=None	#valor de la última lectura registrada en el sistema
 	read=None	#lectura actual
+	alert=False
 	api = nightscout.Api('https://mperezpcgm.herokuapp.com')	#nuestra api de nightscout
 	if not request.user.is_authenticated():
 		return HttpResponseRedirect('/cgmapp/login')	#si no esta logeado, tiene que hacerlo
@@ -76,7 +77,7 @@ def index(request):
 				tend = 'norm'
 		except:
 			pass
-		if (read.valor < conf.ming or read.valor > conf.maxg):	#si se detecta que la lectura es anormal, se llama a los servicios externos
+		if read.is_alert:	#si se detecta que la lectura es anormal, se llama a los servicios externos
 			smscb = conf.smscheck			#estado de la opción de SMS
 			telegramcb = conf.tgcheck		#estado de la opción de telegram
 			if smscb:
@@ -101,33 +102,6 @@ def index(request):
 		readings_list = User.objects.get(username=request.user).reading_set.all()	#y obtenemos una nueva lista vacía
 		context = {'readings_list':readings_list}
 		return render(request, 'cgmapp/index.html', context)
-	'''
-	elif request.POST.has_key('config'):
-		errors=[]
-		mingl = request.POST['mingluc']
-		maxgl = request.POST['maxgluc']
-		sms = request.POST.get('smscb', False)
-		telegram = request.POST.get('telegramcb', False) 
-		try:
-			mingl = int(mingl)								#miramos si los parámetros son enteros
-			maxgl = int(maxgl)
-			if(mingl>maxgl):									#y si el mínimo es superior al máximo
-				errors.append('El máximo debe ser superior al mínimo')
-			else:											#si entramos aquí, los datos introducidos son correctos
-				if sms=="on":
-					sms=True
-				if telegram=="on":
-					telegram=True
-				conf = Conf(username=request.user, ming=mingl, maxg=maxgl, smscheck=sms, tgcheck=telegram, date=datetime.now())
-				conf.save()
-				context={'readings_list':readings_list,'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
-				return render(request, 'cgmapp/index.html', context)
-		except:
-			errors.append('Los valores deben ser enteros')
-		if errors != []:		#si hay algún error, obtenemos la última configuración válida
-			conf = User.objects.get(username=request.user).conf_set.last()
-		return render(request, 'cgmapp/index.html', {'readings_list':readings_list,'errors':errors,'mingluc':conf.ming,'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck})
-	'''
 	context = {'user':request.user,'readings_list':readings_list, 'tend':tend, 'read':read}
 	return render(request, 'cgmapp/index.html', context)
 
@@ -169,14 +143,6 @@ def config(request):
 		return render(request, 'cgmapp/config.html', {'errors':errors,'mingluc':conf.ming,'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck})
 	context={'user':request.user,'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
 	return render(request, 'cgmapp/config.html', context)
-
-
-def show(request):
-	if not request.user.is_authenticated():
-		return HttpResponseRedirect('cgmapp/login')
-	readings_list = User.objects.get(username=request.user).reading_set.all()
-	context = {'user':request.user, 'readings_list': readings_list}
-	return render(request, 'cgmapp/show.html', context)
 
 
 def login(request):
