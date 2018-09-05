@@ -73,7 +73,7 @@
 					margin-bottom: 30px;
 					/*color: inherit;*/
 					color: black;
-					background: url("http://www.glucosehealthinc.com/sites/default/files/blog/biosolutions.jpg") no-repeat center center fixed;
+					background: url("http://vocesescritas.com.ar/sitio/wp-content/uploads/2016/08/azucar.jpg") no-repeat center center fixed;
 					-webkit-background-size: cover;
 					-moz-background-size: cover;
 					-o-background-size: cover;
@@ -114,7 +114,7 @@
 				{% endif %}
 				{% if read %}
 					<p><font size="5">Tu tasa de glucosa actual en la fecha {{read.date}} es:</font></p>
-					<div class="col-lg-5">
+					<div class="col-lg-6">
 						<div class="row">
 							<div class="col-lg-1">
 								{% if read.is_alert %}
@@ -125,12 +125,23 @@
 							<div class="col-lg-3">
 								<p><font size="10">{{read.valor}}</font></p>
 							</div>
-							<div class="col-lg-1">
-								<BR>
+							<div class="col-lg-2">
 								{% if tend == 'desc' %}
-								<i class="fa fa-level-down" style="font-size:48px; color:#0000ff"></i>
+								<div class="col-lg-1">
+									<i class="fa fa-level-down" style="font-size:48px; color:#0000ff"></i>
+								</div>
+								<div class="col-lg-1">
+									<BR>
+									<p><font size="5">{{diff}}</font></p>
+								</div>
 								{% elif tend == 'asc' %}
-								<i class="fa fa-level-up" style="font-size:48px; color:#ff0000"></i>
+								<div class="col-lg-1">
+									<i class="fa fa-level-up" style="font-size:48px; color:#ff0000"></i>
+								</div>
+								<div class="col-lg-1">
+									<BR>
+									<p><font size="5">{{diff}}</font></p>
+								</div>
 								{% elif tend == 'norm' %}
 								<i class="fa fa-long-arrow-right" style="font-size:48px; color:#00ff00"></i>
 								{% endif %}

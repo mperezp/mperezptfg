@@ -15,14 +15,15 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm #Para
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 
-def alert_sms(username, date, valor, mingluc, maxgluc):
+def alert_sms(username, date, valor, mingluc, maxgluc, numtlf):
+	dest = "+34"+str(numtlf)
 	message = "ALERTA DE GLUCOSA.\n" + "Usuario: " + str(username) +"\n" + "Fecha: " + str(date) + "\n" + "Valor: " + str(valor)
 	client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 	if (valor < mingluc):
 		message += " inferior al mínimo[" + str(mingluc) + "]"
 	elif (valor > maxgluc):
 		message += " superior al maximo[" + str(maxgluc) + "]"
-	client.messages.create(body=message, to="+34637298394", from_="+34911062133")
+	client.messages.create(body=message, to=dest, from_="+34911062133")
 
 
 def alert_telegram(username, date, valor, mingluc, maxgluc):
@@ -39,6 +40,7 @@ def alert_telegram(username, date, valor, mingluc, maxgluc):
 
 def index(request):
 	tend=None	#tendencia de los niveles de glucosa (comparacion actual con previa)
+	diff=None	#diferencia entre valores de la lectura actual y anterior
 	last_read=None	#valor de la última lectura registrada en el sistema
 	read=None	#lectura actual
 	alert=False
@@ -49,21 +51,20 @@ def index(request):
 	try:		#obtenemos la última configuración válida, si existe
 		conf = User.objects.get(username=request.user).conf_set.last()
 	except:		#si no existe, creamos la configuración por defecto
-		conf = Conf(username=request.user, ming=70, maxg=110, smscheck=False, tgcheck=False, date=datetime.now())
+		conf = Conf(username=request.user, ming=70, maxg=110, smscheck=False, tgcheck=False, numtlf="637298394", date=datetime.now())
 		conf.save()
 	if request.POST.has_key('read'):	#si queremos realizar una lectura
 		currentsgv = api.getCurrentSgv()		#obtenemos el SGV (Sensor Glucose Value) actual
 		valorc = int(currentsgv.sgv)			#tomamos el campo valor del SGV
 		datec = currentsgv.dateString		#tomamos el campo fecha del sgv
-		if readings_list:	#si hay lecturas en la lista
-			for r in readings_list:		#recorremos la lista de lecturas del usuario
-				if r.date == datec:		#si la fecha de la lectura ya está en la lista, la lectura falló
-					context = {'readings_list': readings_list, 'read_error':'yes'}	#mostramos un mensaje de error al usuario
-					return render(request, 'cgmapp/index.html', context)
 		try:	#obtenemos la última lectura registrada en el sistema, si existe
 			last_read = readings_list.last()
 		except:
 			pass
+		if last_read:	#si hay lecturas en la lista
+			if last_read.date == datec:		#si la fecha de la lectura ya está en la lista, la lectura falló
+				context = {'readings_list': readings_list, 'read_error':'yes'}	#mostramos un mensaje de error al usuario
+				return render(request, 'cgmapp/index.html', context)
 		if (valorc < conf.ming or valorc > conf.maxg):
 			alert = True
 		read = Reading(username=request.user, date=datec, valor=valorc, is_alert=alert)	#creamos una nueva entrada en el historial del usuario
@@ -71,17 +72,20 @@ def index(request):
 		try:	#comprobamos si ya hay algún valor almacenado para comprobar la tendencia
 			if read.valor < last_read.valor:
 				tend = 'desc'
+				diff = last_read.valor - read.valor
 			elif read.valor > last_read.valor:
 				tend = 'asc'
+				diff = read.valor - last_read.valor
 			else:
 				tend = 'norm'
+				diff = 0
 		except:
 			pass
 		if read.is_alert:	#si se detecta que la lectura es anormal, se llama a los servicios externos
 			smscb = conf.smscheck			#estado de la opción de SMS
 			telegramcb = conf.tgcheck		#estado de la opción de telegram
 			if smscb:
-				alert_sms(request.user, read.date, read.valor, conf.ming, conf.maxg)	#si está marcada la opción de alerta por sms, invocamos al servicio
+				alert_sms(request.user, read.date, read.valor, conf.ming, conf.maxg, conf.numtlf)	#si está marcada la opción de alerta por sms, invocamos al servicio
 			if telegramcb:
 				alert_telegram(request.user, read.date, read.valor, conf.ming, conf.maxg)	#si está marcada la opción de telegram, invocamos al servicio
 	elif request.POST.has_key('filter'):
@@ -102,7 +106,7 @@ def index(request):
 		readings_list = User.objects.get(username=request.user).reading_set.all()	#y obtenemos una nueva lista vacía
 		context = {'readings_list':readings_list}
 		return render(request, 'cgmapp/index.html', context)
-	context = {'user':request.user,'readings_list':readings_list, 'tend':tend, 'read':read}
+	context = {'user':request.user,'readings_list':readings_list, 'tend':tend, 'diff':diff,'read':read}
 	return render(request, 'cgmapp/index.html', context)
 
 
@@ -113,14 +117,15 @@ def config(request):
 		conf = User.objects.get(username=request.user).conf_set.last()
 		conf.save()
 	except:
-		conf = Conf(username=request.user, ming=70, maxg=110, smscheck=False, tgcheck=False, date=datetime.now())
+		conf = Conf(username=request.user, ming=70, maxg=110, smscheck=False, tgcheck=False, numtlf="637298394", date=datetime.now())
 		conf.save()
 	if request.POST.has_key('config'):
 		errors=[]
 		mingl = request.POST['mingluc']
 		maxgl = request.POST['maxgluc']
 		sms = request.POST.get('smscb', False)
-		telegram = request.POST.get('telegramcb', False) 
+		telegram = request.POST.get('telegramcb', False)
+		tlf = request.POST.get('tlf','637298394') 
 		try:
 			mingl = int(mingl)								#miramos si los parámetros son enteros
 			maxgl = int(maxgl)
@@ -131,17 +136,19 @@ def config(request):
 					sms=True
 				if telegram=="on":	#y del de Telegram
 					telegram=True
+				if tlf=="":
+					tlf="637298394"
 				#creamos una nueva configuración con los valores actuales
-				conf = Conf(username=request.user, ming=mingl, maxg=maxgl, smscheck=sms, tgcheck=telegram, date=datetime.now())
+				conf = Conf(username=request.user, ming=mingl, maxg=maxgl, smscheck=sms, tgcheck=telegram, numtlf=tlf, date=datetime.now())
 				conf.save()
-				context={'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
+				context={'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck, 'tlf':conf.numtlf}
 				return render(request, 'cgmapp/config.html', context)
 		except:
 			errors.append('Los valores deben ser enteros')
 		if errors != []:		#si hay algún error, obtenemos la última configuración válida
 			conf = User.objects.get(username=request.user).conf_set.last()
-		return render(request, 'cgmapp/config.html', {'errors':errors,'mingluc':conf.ming,'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck})
-	context={'user':request.user,'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck}
+		return render(request, 'cgmapp/config.html', {'errors':errors,'mingluc':conf.ming,'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck, 'tlf':conf.numtlf})
+	context={'user':request.user,'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck, 'tlf':conf.numtlf}
 	return render(request, 'cgmapp/config.html', context)
 
 

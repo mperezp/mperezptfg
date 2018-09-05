@@ -16,6 +16,7 @@ class Conf (models.Model):
 	maxg = models.IntegerField()
 	smscheck = models.BooleanField(default=False)
 	tgcheck = models.BooleanField(default=False)
+	numtlf = models.CharField(max_length=9, default='637298394')
 	date = models.DateField()
 	
 	def __unicode__(self):
