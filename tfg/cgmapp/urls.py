@@ -7,4 +7,5 @@ urlpatterns = patterns('',
 	url(r'^', include('django.contrib.auth.urls')),
 	url(r'^$', views.index, name='index'),
 	url(r'^config/', views.config, name='config'),
+	url(r'^show/', views.show, name='show'),
 	)

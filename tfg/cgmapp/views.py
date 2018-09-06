@@ -151,6 +151,24 @@ def config(request):
 	context={'user':request.user,'mingluc':conf.ming, 'maxgluc':conf.maxg, 'smscb':conf.smscheck, 'telegramcb':conf.tgcheck, 'tlf':conf.numtlf}
 	return render(request, 'cgmapp/config.html', context)
 
+def show(request):
+	if not request.user.is_authenticated():
+		return HttpResponseRedirect('cgmapp/login')
+	readings_list = User.objects.get(username=request.user).reading_set.all()
+	if request.POST.has_key('filter'):
+		day = request.POST['datefilt']	#obtenemos la fecha de filtrado introducida
+		filt_list = []	#lista final filtrada
+		for r in readings_list:				#para cada lectura, tendremos que cambiar su formato para comparar con el input
+			f,h = r.date.split(" ")			#dividimos por fecha y hora
+			d,m,y = f.split("-")			#y la fecha por partes
+			filt = y + "-" + m + "-" + d	#obtenemos el formato para comparar con el input
+			if (day <= filt):				#solo añadimos si el input es anterior o igual a la lectura
+				filt_list.append(r)			#nueva entrada en la lista filtrada
+		context = {'readings_list':filt_list}
+		return render(request, 'cgmapp/show.html', context)
+	context={'user':request.user, 'readings_list':readings_list}
+	return render(request, 'cgmapp/show.html', context)
+
 
 def login(request):
 	if request.user.is_authenticated():

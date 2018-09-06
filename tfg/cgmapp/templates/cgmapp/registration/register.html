@@ -94,7 +94,7 @@
                 <h1 class="text-center">Regístrate en CGMAPP</h1>
 			</div>
 			<div class="page-header">
-                <h2 class="text-center">¡Monitoriza tu glucosa gratis!</h2>
+                <h2 class="text-center">¡Monitoriza tu glucosa!</h2>
             </div>
 			<form class="form-horizontal text-center" role="form" method="post" action=".">
 				{% csrf_token  %}
@@ -120,7 +120,7 @@
 				</div>
 				<div class="text-center">
 					{% if form.errors %}
-						<label><font color="red"><p> Usuario ya existente o las contrasñas no coinciden. Inténtelo de nuevo.</font></p></label>
+						<label><font color="red"><p> Usuario ya existente o las contraseñas no coinciden. Inténtelo de nuevo.</font></p></label>
 	            	{% endif %}
 	            </div>
 				

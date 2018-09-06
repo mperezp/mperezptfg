@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Show</title>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+		<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		<script
+			src="http://maps.googleapis.com/maps/api/js?key=AIzaSyA6TSKfecWhchDu5oWw17WCtg1mpbbPcm4">
+		</script>
+		<style type="text/css">
+			.jumbotron {
+				padding-top: 30px;
+				padding-bottom: 30px;
+				margin-bottom: 30px;
+				/*color: inherit;*/
+				color: black;
+				background: url("http://vocesescritas.com.ar/sitio/wp-content/uploads/2016/08/azucar.jpg") no-repeat center center fixed;
+				-webkit-background-size: cover;
+				-moz-background-size: cover;
+				-o-background-size: cover;
+				background-size: cover;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="jumbotron col-sm-20 col-sm-offset-0">
+				<h1 class = "text-center">Ver lecturas</h1>
+				<div class = "text-right">
+					<label>Bienvenido </label>
+					<label>{{request.user.username}} [</label>
+					<a style="color:red" href="{% url 'logout' %}?next=/cgmapp/login">Salir </a><label> ]</label>
+				</div>
+				<BR>
+				<BR>
+				<label>Mostrar lecturas desde: </label>
+				<form action="{% url 'show' %}" method="post">
+					<input type="date" name="datefilt" min="2018-08-01">
+					{% csrf_token %}
+					<button type="submit" class="btn btn-primary" name="filter">Filtrar</button>
+				</form>
+				{% if readings_list %}
+					<div id="readingsChart" class="col-sm-12"></div>
+					<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+					<script type="text/javascript">
+					// Load google charts
+					google.charts.load('current', {'packages':['corechart']});
+					google.charts.setOnLoadCallback(drawChart);
+
+					// Draw the chart and set the chart values
+					function drawChart() {
+					  var data = new google.visualization.DataTable();
+					  data.addColumn('string','Fecha');
+					  data.addColumn('number','Valor');
+					  {% for read in readings_list %}
+						data.addRow(['{{ read.date }}', {{ read.valor }}]);
+					  {% endfor %}
+
+					  // Optional; add a title and set the width and height of the chart
+					  var options = {'hAxis':{title:'Fecha'},
+						   'vAxis':{title:'Valor'}, 
+						   'backgroundColor':{fill:'transparent', viewWindow:{min:60, max:140}}, 
+						   'height':400};
+
+					  var chart = new google.visualization.LineChart(document.getElementById('readingsChart'));
+					  chart.draw(data, options);
+					}
+					</script>
+				{% else %}
+					<p>Sin lecturas recientes</p>
+				{% endif %}
+				<BR>
+				<div class="text-center">
+					<a style="font-size: x-large" href="{% url 'index' %}">Volver</a>
+				</div>
+
+			</div>
+		</div>
+	</body>
+</html>
